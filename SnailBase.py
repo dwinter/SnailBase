@@ -1,4 +1,5 @@
 import random
+from collections import defaultdict
 
 from Bio import AlignIO, SeqIO, Alphabet
 from Bio.Nexus import Nexus
@@ -135,7 +136,11 @@ class Dataset(list):
     
     def get_sequence(self, seq_name):
         """ get sequences corresonding to a sequence name """
-        return [s.sequences[seq_name] for s in self \
+        return [s.sequences[seq_name]
+        
+        
+        
+         for s in self \
                 if seq_name in s.sequences]
     
 
@@ -221,19 +226,24 @@ def write_multilocus(dataset, filename, format):
     raise NotImplementedError
     
 ########
-def write_beast(dataset, file_handle):
-        """ writes a BEAST "traits file" for *BEAST analysis """
-        d = one_to_many_dict(self.species(), [s.id for s in self])
-        contents = ["\tSpecies\nSpecies"]
-        for species, OTUs in d.items():
-            contents.append("%s\t%s" % (species, "\t".join(OTUs)))
-        file_handle.write("\n".join(contents))
-        return "wrote traits file for %i species" % len(d.keys())
+def write_beast(dataset, file_stem):
+        """ writes a nexus file for each gene, adding species name to id """
+        genes = dataset.get_sequences.keys()
+        for g in genes:
+          seqs = [(d.get_species, d.get_sequence(g)) for d in dataset]
+          for (sp,s) in seqs:
+            s.id = "%s_%s" % (s.id,sp)
+          fname = "file_stem_%s.nex" % g
+          SeqIO.write(seqs, open(fname, "w"), "nexus"))
+        
 
 def write_best(self, file_handle=None):
         """ write a MrBayes block for BEST species tree estimation """
-        d = one_to_many_dict(self.species(),
-                             [str(i) for i in xrange(1,len(self)+1)])
+        d = defaultdict(list)
+        for sp, i in zip(self.species(),
+                         [str(i) for i in xrange(1,len(self)+1)]):
+                         
+          d[sp].append(i)
         contents = ["begin MyBayes;"]
         for species, OTUs in d.items():
             contents.append("taxset %s = % s" % (species, " ".join(OTUs)))
