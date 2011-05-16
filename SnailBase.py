@@ -133,9 +133,10 @@ class Dataset(list):
         """ return a list of sites for specimens in dataset """
         return [s.site for s in self]
     
-    def get_sequence(self, sequence_name):
+    def get_sequence(self, seq_name):
         """ get sequences corresonding to a sequence name """
-        return [s.sequences[sequence_name] for s in self]
+        return [s.sequences[seq_name] for s in self \
+                if seq_name in s.sequences]
     
 
     def change_species(self, from_species, to_species):
@@ -145,13 +146,13 @@ class Dataset(list):
                 self[i].species = to_species
     
     def randomize_species(self):
-        """Ranomly assign existing species names to specimens """
+        """Randomly assign existing species names to specimens """
         sp = random.shuffle(self.get_species())
         for name in sp:
             self.species = name
             
     def sample_by_taxon(self, taxon_tuple):
-        """ Radonmly select samples from different taxa
+        """ Randomly select samples from different taxa
         
         Dataset.random_tax([("venosa", 2), ("globosa", "2")] returns Dataset
         with 2 venosa and 2 globosa specimens
@@ -191,10 +192,14 @@ def select(dataset, attr, values, match_all=True):
 
 
 def write_alignment(dataset, gene, filename, format, **kwarks):
-    """ Writes a single alignment """
-
-    attr_map = {"species": d.species, "id": d.id(), 
-             "site": d.site, "gene": d.sequences.keys(), }
+    """ 
+    Writes a single alignment 
+    
+    For most formats, this wraps Bio.SeqIO.write(). The user provides a gene
+    name, filename and file format. If format = "arp" for Arlequin then
+    the key-word argument 'sample' can be used to split the sequences into 
+    samples based on the 'sites' or 'species' attributes of the specimens
+    """
     
     if  format == "arp":
         if sample == "sites":
@@ -211,11 +216,12 @@ def write_alignment(dataset, gene, filename, format, **kwarks):
                 
 def write_multilocus(dataset, filename, format):
     """ Writes a multilocus alignment for species tree estimation """
-    writer_class = _sptree_map[format]
-    writer_cass(filename).write_files(datasets)
-   
+    #writer_class = _sptree_map[format]
+    #writer_cass(filename).write_files(datasets)
+    raise NotImplementedError
+    
 ########
-def write_beast(self, file_handle):
+def write_beast(dataset, file_handle):
         """ writes a BEAST "traits file" for *BEAST analysis """
         d = one_to_many_dict(self.species(), [s.id for s in self])
         contents = ["\tSpecies\nSpecies"]
