@@ -134,15 +134,18 @@ class Dataset(list):
         """ return a list of sites for specimens in dataset """
         return [s.site for s in self]
     
-    def get_sequence(self, seq_name):
+    def get_sequences(self, seq_name):
         """ get sequences corresonding to a sequence name """
-        return [s.sequences[seq_name]
-        
-        
-        
-         for s in self \
+        return [s.sequences[seq_name] for s in self \
                 if seq_name in s.sequences]
-    
+
+    def get_genes(self):
+      genes = []
+      for d in self:
+        for g in d.sequences.keys():
+          if g not in genes:
+            genes.append(g)
+      return genes
 
     def change_species(self, from_species, to_species):
         """ changen a give species name to something else"""
@@ -176,13 +179,12 @@ class Dataset(list):
 
 def select(dataset, attr, values, match_all=True):
     """A tool to subselect datasets based on arrtibutes of specimens """ 
-    
-
-    attr_map = {"species": d.species, "id": d.id, "site": d.site, 
-                "gene": d.sequences.keys(), }
-    if attr == "ngenes"
+ 
+    if attr == "ngenes":
         return [d for d in dataset if d.sequences.keys > values]
     else:      
+        attr_map = {"species": d.species, "id": d.id, "site": d.site, 
+                    "gene": d.sequences.keys(), }
         if type(values) == string:
             values = [values]
         if match_all:
@@ -227,14 +229,17 @@ def write_multilocus(dataset, filename, format):
     
 ########
 def write_beast(dataset, file_stem):
-        """ writes a nexus file for each gene, adding species name to id """
-        genes = dataset.get_sequences.keys()
-        for g in genes:
-          seqs = [(d.get_species, d.get_sequence(g)) for d in dataset]
-          for (sp,s) in seqs:
-            s.id = "%s_%s" % (s.id,sp)
-          fname = "file_stem_%s.nex" % g
-          SeqIO.write(seqs, open(fname, "w"), "nexus"))
+  """ writes a nexus file for each gene, adding species name to id 
+        
+  adds *_speciesID to each sequence, so BEAUTi can 'guess' the species
+  in the 'traits' tab """
+  genes = dataset.get_genes()
+  for g in genes:
+    seqs = [(d.species, d.sequences[g]) for d in dataset if g in d.sequences]
+    for (sp,s) in seqs:
+     s.id = "%s_%s" % (s.id,sp)
+    fname = "%s_%s.nex" % (file_stem, g)
+    SeqIO.write([seq for sp,seq in seqs], open(fname, "w"), "nexus")
         
 
 def write_best(self, file_handle=None):
@@ -242,7 +247,6 @@ def write_best(self, file_handle=None):
         d = defaultdict(list)
         for sp, i in zip(self.species(),
                          [str(i) for i in xrange(1,len(self)+1)]):
-                         
           d[sp].append(i)
         contents = ["begin MyBayes;"]
         for species, OTUs in d.items():
@@ -274,15 +278,7 @@ def nexify(sequences):
         n.add_sequence(record.id, record.seq.tostring())
     return n
 
-def one_to_many_dict(keys, values):
-    """ crates a dictionary in which keys point to a list of values """
-    d = dict()
-    for k,v in zip(keys, values):
-        if k not in d.keys():
-            d[k] = [v]
-        else:
-            d[k].append(v)
-    return d
+
 
 spiders = SeqIO.parse("tests/spiders.fasta", "fasta")
 d = dataset_from_seq(spiders)
