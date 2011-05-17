@@ -1,6 +1,6 @@
 import random
-from collections import defaultdict
 
+import IO
 from Bio import AlignIO, SeqIO, Alphabet
 from Bio.Nexus import Nexus
 
@@ -26,7 +26,7 @@ and site:
 Data is read into memory with the function dataset_from_seq() 
 
 >>> import SnailBase as sb
->>> spider_data = sb.dataset_from_seqs("tests/spiders.fasta", "fasta")
+>>> spider_data = sb.IO.read("tests/spiders.fasta", "fasta")
 >>> spider_data
 < Dataset with 40 specimens >
 
@@ -109,10 +109,9 @@ class Dataset(list):
         for i, seq in enumerate(self.get_sequences(gene)):
             yield SeqRecord(new_ids[i], seq.seq)
         
-    def add_seqs(self, seqs):
+    def add_seqs(self, fname, format):
         """ Add a records from a sequence file to Dataset"""
-
-        for record in seqs:
+        for record in SeqIO.parse(fname, format):
             if record.id in [spec.id for spec in self]:
                 #specimen already exists, add new sequence
                 spec_index = [spec.id for spec in self].index(record.id)
@@ -140,12 +139,13 @@ class Dataset(list):
                 if seq_name in s.sequences]
 
     def get_genes(self):
-      genes = []
-      for d in self:
-        for g in d.sequences.keys():
+        """ get a list of names of loci in this dataset """
+        genes = []
+        for s in self:
+         for g in s.sequences.keys():
           if g not in genes:
             genes.append(g)
-      return genes
+        return genes
 
     def change_species(self, from_species, to_species):
         """ changen a give species name to something else"""
@@ -198,88 +198,5 @@ def select(dataset, attr, values, match_all=True):
             return Dataset(L)
 
 
-def write_alignment(dataset, gene, filename, format, **kwarks):
-    """ 
-    Writes a single alignment 
-    
-    For most formats, this wraps Bio.SeqIO.write(). The user provides a gene
-    name, filename and file format. If format = "arp" for Arlequin then
-    the key-word argument 'sample' can be used to split the sequences into 
-    samples based on the 'sites' or 'species' attributes of the specimens
-    """
-    
-    if  format == "arp":
-        if sample == "sites":
-            Writers.Arlequin(dataset, gene).write(
-                    filename, sample_map = dataset.get_sites())
-        elif sample == "species":
-            Writers.Arlequin(dataset, gene).write( 
-                             filename, dataset.get_species())
-        else: #write all the sequences to one big sample
-            Writers.Arlequin(dataset.get_sequences(gene), 
-                             filename, ["OneBigOne"] * len(dataset))
-    else:
-        SeqIO.write(dataset.get_sequences(gene), handle, format)
-                
-def write_multilocus(dataset, filename, format):
-    """ Writes a multilocus alignment for species tree estimation """
-    #writer_class = _sptree_map[format]
-    #writer_cass(filename).write_files(datasets)
-    raise NotImplementedError
-    
-########
-def write_beast(dataset, file_stem):
-  """ writes a nexus file for each gene, adding species name to id 
-        
-  adds *_speciesID to each sequence, so BEAUTi can 'guess' the species
-  in the 'traits' tab """
-  genes = dataset.get_genes()
-  for g in genes:
-    seqs = [(d.species, d.sequences[g]) for d in dataset if g in d.sequences]
-    for (sp,s) in seqs:
-     s.id = "%s_%s" % (s.id,sp)
-    fname = "%s_%s.nex" % (file_stem, g)
-    SeqIO.write([seq for sp,seq in seqs], open(fname, "w"), "nexus")
-        
-
-def write_best(self, file_handle=None):
-        """ write a MrBayes block for BEST species tree estimation """
-        d = defaultdict(list)
-        for sp, i in zip(self.species(),
-                         [str(i) for i in xrange(1,len(self)+1)]):
-          d[sp].append(i)
-        contents = ["begin MyBayes;"]
-        for species, OTUs in d.items():
-            contents.append("taxset %s = % s" % (species, " ".join(OTUs)))
-        if file_handle:
-            file_handle.write("\n".join(contents))
-        else:
-            for line in contents:
-                print line
-    
-    
-def write_gsi(self, file_handle):
-    """ Write a mapping file for genealogical sorting w/ R """    
-    for id, sp in [(t.id, t.species) for t in self]:
-        file_handle.write( '"%s" "%s"\n' % (id, sp))
-
-def dataset_from_seq(sequences):
-    """ take a SeqIO object (or list of sequences) and make a dataset """
-    d = Dataset()
-    d.add_seqs(sequences)
-    return d
-
-def nexify(sequences):
-    """ set up a nexus file for one gene """
-    n = Nexus.Nexus("""#NEXUS\nbegin data; dimensions ntax=0 nchar=0;
-                   format datatype=DNA; end;""")
-    n.alphabet = sequences[1].seq.alphabet
-    for record in sequences:
-        n.add_sequence(record.id, record.seq.tostring())
-    return n
-
-
-
-spiders = SeqIO.parse("tests/spiders.fasta", "fasta")
-d = dataset_from_seq(spiders)
+d = IO.read("tests/spiders.fasta", "fasta")
 print d.get_ids()
