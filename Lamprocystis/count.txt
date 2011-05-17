@@ -1,7 +1,0 @@
-pink 3
-grey 1
-globosa 3
-bs 1
-cream1 7
-cream2 3
-venosa 7
