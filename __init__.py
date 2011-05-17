@@ -23,7 +23,7 @@ and site:
 |>Hsap2 human COI Mosgeil
 |ATAFHCATAGGTAC
 
-Data is read into memory with the function dataset_from_seq() 
+Data is read into memory with the function IO.read() 
 
 >>> import SnailBase as sb
 >>> spider_data = sb.IO.read("tests/spiders.fasta", "fasta")
@@ -37,20 +37,16 @@ Specimen object.
 40
 >>> spider_data[1]
 >>> <Specimen xxx with 2 sequences>
->>> spider1 = spider_data[1]
 
 Each specimen contains the specimen id, species and site information as well 
 as a dictionary mapping sequences to the gene name. 
 
 >>> spider1 = spider_data[1]
 >>> spider1.site
+'unknown'
 
-
-Because the Dataset object
-inherits from a Python list, you can use the the information in each Specimen 
-to select from the list
-
-
+Because the Dataset object inherits from a Python list, you can use the the 
+information in each Specimen to select from the list
 
 >>> [s for s in spider_data if len(s.sequences.keys() < 2)]
 <Dataset with 1 specimens>
@@ -60,7 +56,31 @@ dataset you can use the SnailBase function select. Think of hte  select()
 function as some pre-built list comprehensions:
 
 >>> halseti_data = sb.select(spider_data, "species", "halseti")
+>>> #won't work with the test data, whcih doesn't ahve sites
 >>> region1 = sb.select(spider_data, "site", ["site1, "site2"])
+
+
+Once you've cut the dataset down, you'll want to write it out. You can single
+gene alignments for any gene in your dataset to any of the formats Biopython 
+can write 
+
+>>> sb.IO.write_alignment(d, "COI", "spiderCOI.nex", "nexus")
+
+There are some more sophisticated writers too, for species tree estimation
+you can make files for BEST and BEAST and you can write an imap file for GSI
+analysis. eg
+
+>> sb.IO.write_multispecies(d, "spiders", "BEAST")
+wrote spidersCOI.nex
+wrote spidersITS.nex
+>> sb.IO.write_multispecies(d, "spiders", "BEST")
+Add the following to the MrBayes block in spiders.nex
+begin MyBayes;
+taxset atritus = 1 2 9 10 11 12 13 14 15 16 17 18
+taxset katipo = 3 4 5 6 7 8 19 20 21 22 23 24 25 26 27 28 29 30 31 32
+taxset hasseltii = 33 34 35 36 37 38 39
+>>> sb.IO.write_multispecies(d, "spiders", "GSI")
+wrote GSI imap file for 39 taxa
 
 """
 
