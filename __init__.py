@@ -1,5 +1,6 @@
 import random
 
+import IO
 from Bio import AlignIO, SeqIO, Alphabet
 from Bio.Nexus import Nexus
 
@@ -25,7 +26,7 @@ and site:
 Data is read into memory with the function dataset_from_seq() 
 
 >>> import SnailBase as sb
->>> spider_data = sb.dataset_from_seqs("tests/spiders.fasta", "fasta")
+>>> spider_data = sb.IO.read("tests/spiders.fasta", "fasta")
 >>> spider_data
 < Dataset with 40 specimens >
 
@@ -108,10 +109,9 @@ class Dataset(list):
         for i, seq in enumerate(self.get_sequences(gene)):
             yield SeqRecord(new_ids[i], seq.seq)
         
-    def add_seqs(self, seqs):
+    def add_seqs(self, fname, format):
         """ Add a records from a sequence file to Dataset"""
-
-        for record in seqs:
+        for record in SeqIO.parse(fname, format):
             if record.id in [spec.id for spec in self]:
                 #specimen already exists, add new sequence
                 spec_index = [spec.id for spec in self].index(record.id)
@@ -133,10 +133,19 @@ class Dataset(list):
         """ return a list of sites for specimens in dataset """
         return [s.site for s in self]
     
-    def get_sequence(self, sequence_name):
+    def get_sequences(self, seq_name):
         """ get sequences corresonding to a sequence name """
-        return [s.sequences[sequence_name] for s in self]
-    
+        return [s.sequences[seq_name] for s in self \
+                if seq_name in s.sequences]
+
+    def get_genes(self):
+        """ get a list of names of loci in this dataset """
+        genes = []
+        for s in self:
+         for g in s.sequences.keys():
+          if g not in genes:
+            genes.append(g)
+        return genes
 
     def change_species(self, from_species, to_species):
         """ changen a give species name to something else"""
@@ -145,13 +154,13 @@ class Dataset(list):
                 self[i].species = to_species
     
     def randomize_species(self):
-        """Ranomly assign existing species names to specimens """
+        """Randomly assign existing species names to specimens """
         sp = random.shuffle(self.get_species())
         for name in sp:
             self.species = name
             
     def sample_by_taxon(self, taxon_tuple):
-        """ Radonmly select samples from different taxa
+        """ Randomly select samples from different taxa
         
         Dataset.random_tax([("venosa", 2), ("globosa", "2")] returns Dataset
         with 2 venosa and 2 globosa specimens
@@ -164,23 +173,18 @@ class Dataset(list):
         return Dataset(out)
 
 
-##_multi_map = {"bpp":Writers.bpp, "BEST": Writers.BEST, "BEAST": Writers.BEAST, 
-##              "gsi": Writers.gsi, "nexus": Writers.nexus}
-##
 
 def select(dataset, attr, values, match_all=True):
     """A tool to subselect datasets based on arrtibutes of specimens """ 
-    
-
-    attr_map = {"species": d.species, "id": d.id, "site": d.site, 
-                "gene": d.sequences.keys(), }
+ 
     if attr == "ngenes":
-        return Dataset([d for d in dataset if d.sequences.keys > values])
+        return [d for d in dataset if d.sequences.keys > values]
     else:      
-        if type(values) == string:
+        #type checking!!! (but I want to be able to pass string or list here)
+        if isinstance(values, basestring):
             values = [values]
         if match_all:
-            return Dataset([d for d in dataset if attr_map[attr] in values])
+            return Dataset([d for d in dataset if d.__dict__[attr] in values])
         else:
             L = []
             for v in values:
@@ -188,86 +192,3 @@ def select(dataset, attr, values, match_all=True):
                     if specimen.attr_map[attr] == v and d not in L:
                         L.append(d)
             return Dataset(L)
-
-
-def write_alignment(dataset, gene, filename, format, **kwarks):
-    """ Writes a single alignment """
-
-    attr_map = {"species": d.species, "id": d.id(), 
-             "site": d.site, "gene": d.sequences.keys(), }
-    
-    if  format == "arp":
-        if sample == "sites":
-            Writers.Arlequin(dataset, gene).write(
-                    filename, sample_map = dataset.get_sites())
-        elif sample == "species":
-            Writers.Arlequin(dataset, gene).write( 
-                             filename, dataset.get_species())
-        else: #write all the sequences to one big sample
-            Writers.Arlequin(dataset.get_sequences(gene), 
-                             filename, ["OneBigOne"] * len(dataset))
-    else:
-        SeqIO.write(dataset.get_sequences(gene), handle, format)
-                
-def write_multilocus(dataset, filename, format):
-    """ Writes a multilocus alignment for species tree estimation """
-    writer_class = _sptree_map[format]
-    writer_cass(filename).write_files(datasets)
-   
-########
-def write_beast(self, file_handle):
-        """ writes a BEAST "traits file" for *BEAST analysis """
-        d = one_to_many_dict(self.species(), [s.id for s in self])
-        contents = ["\tSpecies\nSpecies"]
-        for species, OTUs in d.items():
-            contents.append("%s\t%s" % (species, "\t".join(OTUs)))
-        file_handle.write("\n".join(contents))
-        return "wrote traits file for %i species" % len(d.keys())
-
-def write_best(self, file_handle=None):
-        """ write a MrBayes block for BEST species tree estimation """
-        d = one_to_many_dict(self.species(),
-                             [str(i) for i in xrange(1,len(self)+1)])
-        contents = ["begin MyBayes;"]
-        for species, OTUs in d.items():
-            contents.append("taxset %s = % s" % (species, " ".join(OTUs)))
-        if file_handle:
-            file_handle.write("\n".join(contents))
-        else:
-            for line in contents:
-                print line
-    
-    
-def write_gsi(self, file_handle):
-    """ Write a mapping file for genealogical sorting w/ R """    
-    for id, sp in [(t.id, t.species) for t in self]:
-        file_handle.write( '"%s" "%s"\n' % (id, sp))
-
-def dataset_from_seq(sequences):
-    """ take a SeqIO object (or list of sequences) and make a dataset """
-    d = Dataset()
-    d.add_seqs(sequences)
-    return d
-
-def nexify(sequences):
-    """ set up a nexus file for one gene """
-    n = Nexus.Nexus("""#NEXUS\nbegin data; dimensions ntax=0 nchar=0;
-                   format datatype=DNA; end;""")
-    n.alphabet = sequences[1].seq.alphabet
-    for record in sequences:
-        n.add_sequence(record.id, record.seq.tostring())
-    return n
-
-def one_to_many_dict(keys, values):
-    """ crates a dictionary in which keys point to a list of values """
-    d = dict()
-    for k,v in zip(keys, values):
-        if k not in d.keys():
-            d[k] = [v]
-        else:
-            d[k].append(v)
-    return d
-
-spiders = SeqIO.parse("tests/spiders.fasta", "fasta")
-d = dataset_from_seq(spiders)
-print d.get_ids()

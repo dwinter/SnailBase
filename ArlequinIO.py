@@ -1,3 +1,9 @@
+
+###
+# Not working ATM, needs to be refactored as have 'one to many' dictionary
+# replace with defaultdict... and probably a lot else!
+##
+
 from Bio.Alphabet import IUPAC, Gapped
 from Bio.Align import MultipleSeqAlignment 
 from Interfaces import AlignmentIterator, SequentialAlignmentWriter 
