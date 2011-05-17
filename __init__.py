@@ -23,7 +23,7 @@ and site:
 |>Hsap2 human COI Mosgeil
 |ATAFHCATAGGTAC
 
-Data is read into memory with the function IO.read() 
+Data is read into memory with the function SnailBase.IO.read() 
 
 >>> import SnailBase as sb
 >>> spider_data = sb.IO.read("tests/spiders.fasta", "fasta")
@@ -36,7 +36,7 @@ Specimen object.
 >>> len(spider_data)
 40
 >>> spider_data[1]
->>> <Specimen xxx with 2 sequences>
+>>> <Specimen 'lh5' with 2 sequences>
 
 Each specimen contains the specimen id, species and site information as well 
 as a dictionary mapping sequences to the gene name. 
@@ -57,7 +57,7 @@ function as some pre-built list comprehensions:
 
 >>> halseti_data = sb.select(spider_data, "species", "halseti")
 >>> #won't work with the test data, whcih doesn't ahve sites
->>> region1 = sb.select(spider_data, "site", ["site1, "site2"])
+>>> region1 = sb.select(spider_data, "site", ["site1", "site2"])
 
 
 Once you've cut the dataset down, you'll want to write it out. You can single
@@ -187,7 +187,7 @@ class Dataset(list):
         """
         out = []
         for species, n in taxon_tuple:
-            sp_pool = self.select_species(species)
+            sp_pool = [s for s in self if s.species == species]
             #can't append because sample() returns a list
             out = out + random.sample(sp_pool, n)
         return Dataset(out)
