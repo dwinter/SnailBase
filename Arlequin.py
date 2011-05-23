@@ -1,16 +1,13 @@
-###
-# Not working ATM, needs to be refactored as have 'one to many' dictionary
-# replace with defaultdict... and probably a lot else!
-##
 from collections import defaultdict
 from Bio.Alphabet import IUPAC, Gapped
-from Bio.AlignIO.Interfaces import AlignmentIterator-
+from Bio.AlignIO.Interfaces import AlignmentIterator
+
 
 profile_text = """
 [Profile]
 
-	Title="Automatically generated with biopython"
-	NbSamples= %i
+	  Title="Automatically generated with Biopython"
+	  NbSamples= %i
     GenotypicData=0
     DataType=DNA
     LocusSeparator=NONE
@@ -27,30 +24,26 @@ sample_text = """
     SampleData={\n\n
 """
 
-
-
-def ArlequinIO()
-dataset, gene, filename, dataset.get_sites()
-
-def write(self, records, sample_map, handle):
-""" writes sequences to arlequin file """
+def write(records, filename, sample_map):
+  """ writes sequences to arlequin file """
+  handle = open(filename, "w")
   if len(records) == 0:
       raise ValueError("Need at at least one sequence to write")
   samples = defaultdict(list)
-  for r, s in zip(records,samples):
-    d[s].append(r)
+  for r, s in zip(records,sample_map):
+    samples[s].append(r)
   handle.write(profile_text % len(samples.keys()))
   for sample, records in samples.items():
       handle.write(sample_text % (sample, len(records)))
       for rec in records:
           handle.write("\t\t%s 1 %s\n" % (rec.name, rec.seq))
       handle.write("}\n")
-   
+  print "wrote records in %s samples" % samples.keys()
  
 	
-############################################################
-##This works in Biopython, needs refactoring for SnailBase##
-############################################################
+#####################################################################
+##This works in Biopython, probably needs refactoring for SnailBase##
+#####################################################################
 	
 class ArlequinIterator(AlignmentIterator):
     """Iterate over alignment of DNA sequences in Arlequin format
@@ -116,4 +109,5 @@ class ArlequinIterator(AlignmentIterator):
                 record = alignment.get_all_seqs()[-1]
                 record.annotations["sample"] = sample_name
                 record.annotations["frequency"] = int(freq)
+        #return because there is only one alignment per file        
         return alignment

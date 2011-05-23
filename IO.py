@@ -2,7 +2,7 @@ import SnailBase as sb
 from collections import defaultdict
 from Bio import SeqIO
 from Bio.Nexus import Nexus
-
+from SnailBase import Arlequin
 
 def read(sequences, format):
   """ take a SeqIO object (or list of sequences) and make a dataset """
@@ -11,7 +11,7 @@ def read(sequences, format):
   return d
     
 
-def write_alignment(dataset, gene, filename, format, **kwarks):
+def write_alignment(dataset, gene, filename, format, **kwargs):
   """ 
   Writes an alignment for one gene
   
@@ -22,12 +22,12 @@ def write_alignment(dataset, gene, filename, format, **kwarks):
   """
   seqs = dataset.get_sequences(gene)  
   if format == "arp":
-    if sample == "sites":
-      sb.Arlequin.write(seqs, filename, dataset.get_sites())
-    elif sample == "species":
-      sb.Arlequin.write(seqs, filename, dataset.get_species())
+    if kwargs["sample"] == "sites":
+      Arlequin.write(seqs, filename, dataset.get_sites())
+    elif kwargs["sample"] == "species":
+      Arlequin.write(seqs, filename, dataset.get_species())
     else: #write all the sequences to one big sample
-      sb.Arlequin.write(seqs, filename,["OneBigOne"] * len(dataset)))
+      Arlequin.write(seqs, filename,["OneBigOne"] * len(dataset))
   else:
     SeqIO.write(dataset.get_sequences(gene), filename, format)
 
