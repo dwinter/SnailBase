@@ -13,27 +13,29 @@ def read(sequences, format):
 
 def write_alignment(dataset, gene, filename, format, **kwarks):
   """ 
-  Writes a single alignment 
+  Writes an alignment for one gene
   
   For most formats, this wraps Bio.SeqIO.write(). The user provides a gene
   name, filename and file format. If format = "arp" for Arlequin then
   the key-word argument 'sample' can be used to split the sequences into 
   samples based on the 'sites' or 'species' attributes of the specimens
   """
-    
+  seqs = dataset.get_sequences(gene)  
   if format == "arp":
     if sample == "sites":
-      sb.Arlequin(dataset, gene).write(filename, dataset.get_sites())
+      sb.Arlequin.write(seqs, filename, dataset.get_sites())
     elif sample == "species":
-      sb.Arlequin(dataset, gene).write(filename, dataset.get_species())
+      sb.Arlequin.write(seqs, filename, dataset.get_species())
     else: #write all the sequences to one big sample
-      sb.Arlequin(dataset.get_sequences(gene).write(filename, 
-                   ["OneBigOne"] * len(dataset)))
+      sb.Arlequin.write(seqs, filename,["OneBigOne"] * len(dataset)))
   else:
     SeqIO.write(dataset.get_sequences(gene), filename, format)
 
 def write_dataset(dataset, filename, format):
   """
+  Write out the whole data set
+  
+  If
   """
   if format in ["snailbase", "sb", "fasta"]:
     seqs = (s.sequences.values() for s in dataset)
@@ -68,10 +70,11 @@ def _write_GSI(dataset, filestem):
 
 
 def _write_BEAST(dataset, filestem):
-  """ writes a nexus file for each gene, adding species name to id 
+  """ Writes a nexus file for each gene, adding species name to id 
         
   adds *_speciesID to each sequence, so BEAUTi can 'guess' the species
-  in the 'traits' tab """
+  in the 'traits' tab 
+  """
   genes = dataset.get_genes()
   for g in genes:
     seqs = [(d.species, d.sequences[g]) for d in dataset if g in d.sequences]
@@ -83,34 +86,31 @@ def _write_BEAST(dataset, filestem):
         
 
 def _write_BEST(dataset, filestem):
-        """ write a MrBayes block for BEST species tree estimation """
-        fname = filestem + ".nex"
-        write_dataset(dataset, fname, "nexus")
-        
-        d = defaultdict(list)
-        for sp, i in zip(dataset.get_species(),
-                         [str(i) for i in xrange(1,len(dataset)+1)]):
-          d[sp].append(i)
-        contents = ["begin MyBayes;"]
-        for species, OTUs in d.items():
-            contents.append("taxset %s = % s" % (species, " ".join(OTUs)))
-        print "Add the following to the MrBayes block in %s" % fname
-        for line in contents:
-            print line
-
+  """ write a MrBayes block for BEST species tree estimation """
+  fname = filestem + ".nex"
+  #write a nexus file with partitions for each gene
+  nexi = []
+  for g in dataset.get_genes():
+    nexi.append( (g, _nexify( dataset.get_sequences(g)))) 
+  combined = Nexus.combine(nexi)
+  combined.write_nexus_data(filename=fname)
+  #then build a MrBayes blog for BEST
+  d = defaultdict(list)
+  for sp, i in zip(dataset.get_species(),
+                   [str(i) for i in xrange(1,len(dataset)+1)]):
+    d[sp].append(i)
+  contents = ["begin MyBayes;"]
+  for species, OTUs in d.items():
+      contents.append("taxset %s = % s" % (species, " ".join(OTUs)))
+  print "Add the following to the MrBayes block in %s" % fname
+  for line in contents:
+      print line
 
 def _nexify(sequences):
-    """ set up a nexus file for one gene """
+    """ set up a nexus file for one gene (used for concatenation) """
     n = Nexus.Nexus("""#NEXUS\nbegin data; dimensions ntax=0 nchar=0;
                    format datatype=DNA; end;""")
     n.alphabet = sequences[1].seq.alphabet
     for record in sequences:
         n.add_sequence(record.id, record.seq.tostring())
     return n
-
-
-
-
-  
-      
-      

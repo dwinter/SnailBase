@@ -1,13 +1,10 @@
-
 ###
 # Not working ATM, needs to be refactored as have 'one to many' dictionary
 # replace with defaultdict... and probably a lot else!
 ##
-
+from collections import defaultdict
 from Bio.Alphabet import IUPAC, Gapped
-from Bio.Align import MultipleSeqAlignment 
-from Interfaces import AlignmentIterator, SequentialAlignmentWriter 
-
+from Bio.AlignIO.Interfaces import AlignmentIterator-
 
 profile_text = """
 [Profile]
@@ -32,41 +29,23 @@ sample_text = """
 
 
 
-class ArlequinIO()
-    """ Write an alignment in Arlequin format (work in progress...)
-        
-        Works like AlignIO in Biopython with the adition of "sample map" to map
-        records to a sample in an arp file.
-        
-        >>> sequences = SeqIO.parse("primates.fasta", "fasta")
-        >>> sp = ["H", "H", "G", "G", "O", "O"]
-        >>> ArlequinIO.write(sequences, sp, open("primates.arp", "arp")
-    """
+def ArlequinIO()
+dataset, gene, filename, dataset.get_sites()
 
-	def _one_to_many_dict(keys, values):
-        """ creates a dictionary in which keys point to a list of values """
-        d = dict()
-        for k,v in zip(keys, values):
-            if k not in d.keys():
-                d[k] = [v]
-            else:
-                d[k].append(v)
-        return d
-    
-    def write(self, records, sample_map, handle):
-    """ writes sequences to arlequin file """
-
-        if len(records) == 0:
-            raise ValueError("Need at at least one sequence to write")
-        samples = one_to_many_dict(sample_map, records)            
-        handle.write(profile_text % len(samples.keys()))
-        samples = self._one_to_many_dict(sample_map, records)
-        for sample, records in samples.items():
-            handle.write(sample_text % (sample, len(records)))
-            for rec in records:
-                handle.write("\t\t%s 1 %s\n" % (rec.name, rec.seq))
-            handle.write("}\n")
-       
+def write(self, records, sample_map, handle):
+""" writes sequences to arlequin file """
+  if len(records) == 0:
+      raise ValueError("Need at at least one sequence to write")
+  samples = defaultdict(list)
+  for r, s in zip(records,samples):
+    d[s].append(r)
+  handle.write(profile_text % len(samples.keys()))
+  for sample, records in samples.items():
+      handle.write(sample_text % (sample, len(records)))
+      for rec in records:
+          handle.write("\t\t%s 1 %s\n" % (rec.name, rec.seq))
+      handle.write("}\n")
+   
  
 	
 ############################################################
