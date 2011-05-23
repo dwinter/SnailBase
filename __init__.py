@@ -214,7 +214,7 @@ def select(dataset, attr, values, match_all=True):
         if isinstance(values, basestring):
             values = [values]
         if match_all:
-            return Dataset([d for d in dataset if d.__dict__[attr] in values])
+            return Dataset([d for d in dataset if getattr(d, attr) in values])
         else:
             L = []
             for v in values:
