@@ -53,7 +53,7 @@ class ArlequinIterator(AlignmentIterator):
         """
         return line.split("#")[0]
 
-    def _get_attr(self, line):
+    def _get_value(self, line):
         """get attributes from the header sections of file
         """
         value = line.split("=")[1].replace('"', "").replace("'", "")
@@ -72,17 +72,17 @@ class ArlequinIterator(AlignmentIterator):
         while "[Data]" not in self._clean(line):
             line = self._clean(self.handle.readline())
             if "DataType" in line:
-                dtype = self._get_attr(line)
+                dtype = self._get_value(line)
                 if dtype != 'DNA':
                     raise ValueError("At the moment the arlequin parser only "
                     "supports haplotypic datafiles, this file has %s data" %
                     dtype)
             if "MissingData" in line:
                 self.alphabet = Gapped(IUPAC.ambiguous_dna,
-                                       self._get_attr(line))
+                                       self._get_value(line))
             if "NbSamples" in line:
                 try:
-                    self.nsamples = int(self._get_attr(line))
+                    self.nsamples = int(self._get_value(line))
                 except ValueError:
                    print "Can't coerce NbSamples from profile to an integer"
 
@@ -96,9 +96,9 @@ class ArlequinIterator(AlignmentIterator):
             line = self._clean(self.handle.readline())
             while "SampleName" not in line:
                 line = self._clean(self.handle.readline())
-            sample_name = self._get_attr(line)
+            sample_name = self._get_value(line)
             line = self._clean(self.handle.readline())
-            nseqs = int(self._get_attr(line))
+            nseqs = int(self._get_value(line))
             line = self.handle.readline()
             records = []
             for sequence in xrange(0, nseqs):

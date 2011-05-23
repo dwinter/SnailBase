@@ -1,4 +1,4 @@
 
 import SnailBase as sb
 spider = sb.IO.read("SnailBase/tests/spiders.fasta", "fasta")
-sb.IO.write_alignment(spider, "COI", "spiders.arp", "arp", sample="species")
+#sb.IO.write_alignment(spider, "COI", "spiders.arp", "arp", sample="species")

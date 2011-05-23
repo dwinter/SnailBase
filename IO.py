@@ -35,22 +35,20 @@ def write_dataset(dataset, filename, format):
   """
   Write out the whole data set
   
-  If
+  For now this only writes to Fasta format (phylip can't handle long names and
+  nexus can't deal with uneven sequence lengths)
   """
   if format in ["snailbase", "sb", "fasta"]:
     seqs = (s.sequences.values() for s in dataset)
     SeqIO.write(seqs, open(filename, "w"), "fasta")
-  elif format == "nexus":
-    nexi = []
-    for g in dataset.get_genes():
-      nexi.append( (g, _nexify( dataset.get_sequences(g)))) 
-    combined = Nexus.combine(nexi)
-    combined.write_nexus_data(filename=filename)
   else:
     raise ValueError, "Can't handle format %s for whole dataset" % format
 
 def write_multispecies(dataset, filestem, format):
   """
+  Prepare sequence files for species-delimtation/species tree methods
+  
+  Avaliable fromats are BEAST, BEST and GSI
   """
   multi_map = {"BEAST":_write_BEAST, "BEST":_write_BEST, "GSI":_write_GSI}
   if format in multi_map:
@@ -60,7 +58,10 @@ def write_multispecies(dataset, filestem, format):
     
 
 def _write_GSI(dataset, filestem):
-    """ Write a mapping file for genealogical sorting w/ R """    
+    """ Write a mapping file for genealogical sorting w/ R 
+    
+    Used by write_multispecies()
+    """    
     handle = open(filestem, 'w')
     counter = 0
     for id, sp in [(t.id, t.species) for t in dataset]:
@@ -72,7 +73,7 @@ def _write_GSI(dataset, filestem):
 def _write_BEAST(dataset, filestem):
   """ Writes a nexus file for each gene, adding species name to id 
         
-  adds *_speciesID to each sequence, so BEAUTi can 'guess' the species
+  Used by write_multispecies(). Adds *_speciesID to each sequence, so BEAUTi can 'guess' the species
   in the 'traits' tab 
   """
   genes = dataset.get_genes()
@@ -86,7 +87,11 @@ def _write_BEAST(dataset, filestem):
         
 
 def _write_BEST(dataset, filestem):
-  """ write a MrBayes block for BEST species tree estimation """
+  """ write a MrBayes block for BEST species tree estimation 
+  
+  Used by write_multispecies(), writes a concatenated nexus file and prints
+  MrBayes block to screen.
+  """
   fname = filestem + ".nex"
   #write a nexus file with partitions for each gene
   nexi = []
