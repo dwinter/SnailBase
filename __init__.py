@@ -184,13 +184,19 @@ class Dataset(list):
                 self[i].species = to_species
     
     def randomize_species(self):
-        """Randomly assign existing species names to specimens """
-        sp = random.shuffle(self.get_species())
-        for name in sp:
-            self.species = name
+        """Randomly assign existing species names to specimens 
+        
+        You might want to do this for permutation tests, returns a new dataset
+        """
+        d = Dataset(self[:])
+        sp = d.get_species()
+        random.shuffle(sp)
+        for name, specimen in zip(sp,d):
+            specimen.species = name
+        return d
             
     def sample_by_taxon(self, taxon_tuple):
-        """ Randomly select samples from different taxa
+        """ Randomly select samples from different taxa (returns new dataset)
         
         Dataset.random_tax([("venosa", 2), ("globosa", "2")] returns Dataset
         with 2 venosa and 2 globosa specimens
