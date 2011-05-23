@@ -1,0 +1,275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to SnailBase’s documentation! &mdash; SnailBase v0.1 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="SnailBase v0.1 documentation" href="#" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
+        <li><a href="#">SnailBase v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-SnailBase">
+<h1>Welcome to SnailBase&#8217;s documentation!<a class="headerlink" href="#module-SnailBase" title="Permalink to this headline">¶</a></h1>
+<p>Contents:</p>
+<ul class="simple">
+</ul>
+<p>This module is used to handle DNA sequences assoiciated with individual
+samples in phylogeography and multi-locus phylogeny projects. The main aim is
+to make it easy to manage and modify data, to subselect sequences based on the
+species or the site they belong to and to create the specfic datafiles
+required for analysis.</p>
+<p>This docstring provides an overview of the module, you should read teh docs of e
+ach class and each function to get the full detials</p>
+<p>SnailBase doesn&#8217;t use persitant objects, instead it accepts a flat fasta DNA
+sequence file with the description field carrying information on species, gene
+and site:</p>
+<div class="line-block">
+<div class="line">&gt;Hsap1 human COI Dunedin</div>
+<div class="line">ATAGCAGTAATGCT</div>
+<div class="line">&gt;Hsap2 human COI Mosgeil</div>
+<div class="line">ATAFHCATAGGTAC</div>
+</div>
+<p>Data is read into memory with the function <tt class="docutils literal"><span class="pre">SnailBase.IO.read()</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">SnailBase</span> <span class="kn">as</span> <span class="nn">sb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spider_data</span> <span class="o">=</span> <span class="n">sb</span><span class="o">.</span><span class="n">IO</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s">&quot;tests/spiders.fasta&quot;</span><span class="p">,</span> <span class="s">&quot;fasta&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spider_data</span>
+<span class="go">&lt; Dataset with 40 specimens &gt;</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">Dataset</span></tt> object acts like a list, with each element of the list being a
+<tt class="docutils literal"><span class="pre">Specimen</span></tt> object.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">spider_data</span><span class="p">)</span>
+<span class="go">40</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spider_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="o">&lt;</span><span class="n">Specimen</span> <span class="s">&#39;lh5&#39;</span> <span class="k">with</span> <span class="mi">2</span> <span class="n">sequences</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Each specimen contains the specimen id, species and site information as well
+as a dictionary mapping sequences to the gene name.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">spider1</span> <span class="o">=</span> <span class="n">spider_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">dir</span><span class="p">(</span><span class="n">spider1</span><span class="p">)[</span><span class="mi">4</span><span class="p">:]</span>
+<span class="go">[&#39;add_seq&#39;, &#39;id&#39;, &#39;sequences&#39;, &#39;site&#39;, &#39;species&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spider1</span><span class="o">.</span><span class="n">site</span>
+<span class="go">&#39;unknown&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spider1</span><span class="o">.</span><span class="n">sequences</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="go">[&quot;ITS&quot;, &quot;COI&quot;]</span>
+</pre></div>
+</div>
+<p>Because the <tt class="docutils literal"><span class="pre">Dataset</span></tt> object inherits from a Python list, you can use the the
+information in each <tt class="docutils literal"><span class="pre">Specimen</span></tt> to select from the list. Say you wanted to find
+those specimens with less that two genes associated</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">spider_data</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">sequences</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">)]</span>
+<span class="go">&lt;Dataset with 1 specimens&gt;</span>
+</pre></div>
+</div>
+<p>Instead or writting a list expression every time you want to subselect a
+dataset you can use the SnailBase function <tt class="docutils literal"><span class="pre">select()</span></tt>. Think of the
+<tt class="docutils literal"><span class="pre">select()</span></tt> function as some pre-built list comprehensions:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">halseti_data</span> <span class="o">=</span> <span class="n">sb</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">spider_data</span><span class="p">,</span> <span class="s">&quot;species&quot;</span><span class="p">,</span> <span class="s">&quot;halseti&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c">#won&#39;t work with the test data, whcih doesn&#39;t have sites</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">region1</span> <span class="o">=</span> <span class="n">sb</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">spider_data</span><span class="p">,</span> <span class="s">&quot;site&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;site1&quot;</span><span class="p">,</span> <span class="s">&quot;site2&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Once you&#8217;ve cut the dataset down, you&#8217;ll want to write it out. You can single
+gene alignments for any gene in your dataset to any of the formats Biopython
+can write</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">spiders</span> <span class="o">=</span> <span class="n">d</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sb</span><span class="o">.</span><span class="n">IO</span><span class="o">.</span><span class="n">write_alignment</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s">&quot;COI&quot;</span><span class="p">,</span> <span class="s">&quot;spiderCOI.nex&quot;</span><span class="p">,</span> <span class="s">&quot;nexus&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>There are some more sophisticated writers too. If you want to do some
+phylogeography or population genetics, you can use <tt class="docutils literal"><span class="pre">write_alignment()</span></tt> to
+generate an Arlequin (.arp) file with either species or sites used to split
+specimens into samples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sb</span><span class="o">.</span><span class="n">IO</span><span class="o">.</span><span class="n">write_alignment</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s">&quot;COI&quot;</span><span class="p">,</span> <span class="s">&quot;spiders.arp&quot;</span><span class="p">,</span> <span class="s">&quot;arp&quot;</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="s">&quot;species&quot;</span><span class="p">)</span>
+<span class="go">wrote records in 3 samples</span>
+</pre></div>
+</div>
+<p>For species tree estimation you can make files for BEST and BEAST and you can
+write an imap file for GSI analysis using <tt class="docutils literal"><span class="pre">write_multispecies()</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sb</span><span class="o">.</span><span class="n">IO</span><span class="o">.</span><span class="n">write_multispecies</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s">&quot;spiders&quot;</span><span class="p">,</span> <span class="s">&quot;BEAST&quot;</span><span class="p">)</span>
+<span class="go">wrote spidersCOI.nex</span>
+<span class="go">wrote spidersITS.nex</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sb</span><span class="o">.</span><span class="n">IO</span><span class="o">.</span><span class="n">write_multispecies</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s">&quot;spiders&quot;</span><span class="p">,</span> <span class="s">&quot;BEST&quot;</span><span class="p">)</span>
+<span class="go">Add the following to the MrBayes block in spiders.nex</span>
+<span class="go">begin MyBayes;</span>
+<span class="go">taxset atritus = 1 2 9 10 11 12 13 14 15 16 17 18</span>
+<span class="go">taxset katipo = 3 4 5 6 7 8 19 20 21 22 23 24 25 26 27 28 29 30 31 32</span>
+<span class="go">taxset hasseltii = 33 34 35 36 37 38 39</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sb</span><span class="o">.</span><span class="n">IO</span><span class="o">.</span><span class="n">write_multispecies</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s">&quot;spiders&quot;</span><span class="p">,</span> <span class="s">&quot;GSI&quot;</span><span class="p">)</span>
+<span class="go">wrote GSI imap file for 39 taxa</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="SnailBase.Dataset">
+<em class="property">class </em><tt class="descclassname">SnailBase.</tt><tt class="descname">Dataset</tt><big>(</big><em>L=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#SnailBase.Dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>A whole dataset with multiple species and tricks to subselect</p>
+<dl class="method">
+<dt id="SnailBase.Dataset.add_seqs">
+<tt class="descname">add_seqs</tt><big>(</big><em>fname</em>, <em>format</em><big>)</big><a class="headerlink" href="#SnailBase.Dataset.add_seqs" title="Permalink to this definition">¶</a></dt>
+<dd>Add a records from a sequence file to Dataset</dd></dl>
+
+<dl class="method">
+<dt id="SnailBase.Dataset.change_species">
+<tt class="descname">change_species</tt><big>(</big><em>from_species</em>, <em>to_species</em><big>)</big><a class="headerlink" href="#SnailBase.Dataset.change_species" title="Permalink to this definition">¶</a></dt>
+<dd>changen a give species name to something else</dd></dl>
+
+<dl class="method">
+<dt id="SnailBase.Dataset.get_genes">
+<tt class="descname">get_genes</tt><big>(</big><big>)</big><a class="headerlink" href="#SnailBase.Dataset.get_genes" title="Permalink to this definition">¶</a></dt>
+<dd>get a list of names of loci in this dataset</dd></dl>
+
+<dl class="method">
+<dt id="SnailBase.Dataset.get_ids">
+<tt class="descname">get_ids</tt><big>(</big><big>)</big><a class="headerlink" href="#SnailBase.Dataset.get_ids" title="Permalink to this definition">¶</a></dt>
+<dd>return a list of specimen ids</dd></dl>
+
+<dl class="method">
+<dt id="SnailBase.Dataset.get_sequences">
+<tt class="descname">get_sequences</tt><big>(</big><em>seq_name</em><big>)</big><a class="headerlink" href="#SnailBase.Dataset.get_sequences" title="Permalink to this definition">¶</a></dt>
+<dd>get sequences corresonding to a sequence name</dd></dl>
+
+<dl class="method">
+<dt id="SnailBase.Dataset.get_sites">
+<tt class="descname">get_sites</tt><big>(</big><big>)</big><a class="headerlink" href="#SnailBase.Dataset.get_sites" title="Permalink to this definition">¶</a></dt>
+<dd>return a list of sites for specimens in dataset</dd></dl>
+
+<dl class="method">
+<dt id="SnailBase.Dataset.get_species">
+<tt class="descname">get_species</tt><big>(</big><big>)</big><a class="headerlink" href="#SnailBase.Dataset.get_species" title="Permalink to this definition">¶</a></dt>
+<dd>return a list of species names for specimens</dd></dl>
+
+<dl class="method">
+<dt id="SnailBase.Dataset.randomize_species">
+<tt class="descname">randomize_species</tt><big>(</big><big>)</big><a class="headerlink" href="#SnailBase.Dataset.randomize_species" title="Permalink to this definition">¶</a></dt>
+<dd>Randomly assign existing species names to specimens</dd></dl>
+
+<dl class="method">
+<dt id="SnailBase.Dataset.sample_by_taxon">
+<tt class="descname">sample_by_taxon</tt><big>(</big><em>taxon_tuple</em><big>)</big><a class="headerlink" href="#SnailBase.Dataset.sample_by_taxon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Randomly select samples from different taxa</p>
+<p>Dataset.random_tax([(&#8220;venosa&#8221;, 2), (&#8220;globosa&#8221;, &#8220;2&#8221;)] returns Dataset
+with 2 venosa and 2 globosa specimens</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="SnailBase.Region">
+<em class="property">class </em><tt class="descclassname">SnailBase.</tt><tt class="descname">Region</tt><big>(</big><em>L=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#SnailBase.Region" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that represents a region, a set of sites</p>
+<p>work in progress, for now this is just a list</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="SnailBase.Specimen">
+<em class="property">class </em><tt class="descclassname">SnailBase.</tt><tt class="descname">Specimen</tt><big>(</big><em>seq</em><big>)</big><a class="headerlink" href="#SnailBase.Specimen" title="Permalink to this definition">¶</a></dt>
+<dd><p>A specimen in a dataset with sequences and site information</p>
+<dl class="method">
+<dt id="SnailBase.Specimen.add_seq">
+<tt class="descname">add_seq</tt><big>(</big><em>record</em><big>)</big><a class="headerlink" href="#SnailBase.Specimen.add_seq" title="Permalink to this definition">¶</a></dt>
+<dd>add a SeqRecord object to a Specimen</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="SnailBase.select">
+<tt class="descclassname">SnailBase.</tt><tt class="descname">select</tt><big>(</big><em>dataset</em>, <em>attr</em>, <em>values</em>, <em>match_all=True</em><big>)</big><a class="headerlink" href="#SnailBase.select" title="Permalink to this definition">¶</a></dt>
+<dd>A tool to subselect datasets based on arrtibutes of specimens</dd></dl>
+
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference external" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference external" href="modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference external" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="#">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">Welcome to SnailBase&#8217;s documentation!</a><ul>
+</ul>
+</li>
+<li><a class="reference external" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/index.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="modindex.html" title="Global Module Index"
+             >modules</a> |</li>
+        <li><a href="#">SnailBase v0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2011, David Winter.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.6.
+    </div>
+  </body>
+</html>
