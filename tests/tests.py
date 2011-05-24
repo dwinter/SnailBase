@@ -9,16 +9,19 @@ class TestSnailBase(unittest.TestCase)
     	d = sb.dataset_from_seqs(SeqIO.parse(open("spiders.fasta"), "fasta"))
     
     def test_read(self):
-    """ test on reading the spider data """
-    self.assertEqual(len(d), 40)
-    self.assertEqual(d.species[7:11], 
-                     ['katipo', 'hasseltii', 'hasseltii', 'atritus'])
-    self.assertEqual(len(d.get_sequence("ITS")), 39)
-    self.assertEqual(len(d.get_sequence("COI")), 40)
+      """ test on reading the spider data """
+     self.assertEqual(len(d), 39)
+     self.assertEqual(d.get_species[::11], 
+                      ['atritus', 'atritus', 'katipo', 'hasseltii'])
+     self.assertEqual(len(d.get_sequences("ITS")), 39)
+    
+    def test_add(self):
+      """ Test on adding squences to dataset """
+      d.add_seqs("SnailBase/tests/spidersCOI.fasta", "fasta")
+      self.assertEqual(lend(d.get_sequences("COI")), 39)
     
     def test_select(self):
     """ do the selection methods work """
-    self.assertEqual(len(sb.select(d, "gene", "COI")), 40)
     self.assertEqual(len(sb.select(d, "species", "katipo")), 20)
     self.assertEqual(len(sb.select(d, "ngenes", 1)), 1)
     self.assertEqual(len(sb.seletct(d, "id", "La13")),1)
