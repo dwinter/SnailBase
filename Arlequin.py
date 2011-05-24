@@ -35,10 +35,16 @@ def write(records, filename, sample_map):
   handle.write(profile_text % len(samples.keys()))
   for sample, records in samples.items():
       handle.write(sample_text % (sample, len(records)))
+      frequencies = defaultdict(int)
       for rec in records:
-          handle.write("\t\t%s 1 %s\n" % (rec.name, rec.seq))
+        frequencies[rec.seq.tostring()] += 1
+      hap = 1  
+      for seq, f in frequencies.items():
+          name = "%s_%s" % (sample, str(hap))
+          handle.write("\t\t%s %s %s\n" % (name, f, seq))
+          hap += 1
       handle.write("}\n")
-  print "wrote records in %s samples" % samples.keys()
+  print "wrote records in %s samples" % len(samples.keys())
  
 	
 #####################################################################
