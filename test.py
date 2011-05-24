@@ -1,8 +1,8 @@
 import unittest, sys, filecmp, os
-sys.path.append("/home/david/dev")
 import SnailBase as sb
 
 #setup
+os.chdir("tests/")
 d = sb.IO.read("spiders.fasta", "fasta")
 
 d2 = sb.IO.read("spiders.fasta", "fasta")
