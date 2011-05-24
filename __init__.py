@@ -216,7 +216,7 @@ def select(dataset, attr, values):
   """A tool to subselect datasets based on arrtibutes of specimens """ 
 
   if attr == "ngenes":
-    return [d for d in dataset if d.sequences.keys() > values]
+    return [d for d in dataset if len(d.sequences.keys()) > values-1]
   else:      
     #type checking!!! (but I want to be able to pass string or list here)
     if isinstance(values, basestring):

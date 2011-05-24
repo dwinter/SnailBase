@@ -62,12 +62,12 @@ def _write_GSI(dataset, filestem):
     
     Used by write_multispecies()
     """    
-    handle = open(filestem, 'w')
+    handle = open(filestem+".imap", "w")
     counter = 0
     for id, sp in [(t.id, t.species) for t in dataset]:
         handle.write( '"%s" "%s"\n' % (id, sp))
         counter += 1
-    print "wrote GSI imap file for %s taxa" % counter 
+    return "wrote GSI imap file for %s taxa" % counter 
 
 
 def _write_BEAST(dataset, filestem):
@@ -83,7 +83,7 @@ def _write_BEAST(dataset, filestem):
      s.id = "%s_%s" % (s.id,sp)
     fname = "%s_%s.nex" % (filestem, g)
     SeqIO.write([seq for sp,seq in seqs], open(fname, "w"), "nexus")
-    print "wrote %" % fname
+    return "wrote %" % fname
         
 
 def _write_BEST(dataset, filestem):
@@ -99,7 +99,7 @@ def _write_BEST(dataset, filestem):
     nexi.append( (g, _nexify( dataset.get_sequences(g)))) 
   combined = Nexus.combine(nexi)
   combined.write_nexus_data(filename=fname)
-  #then build a MrBayes blog for BEST
+  #then build a MrBayes block for BEST
   d = defaultdict(list)
   for sp, i in zip(dataset.get_species(),
                    [str(i) for i in xrange(1,len(dataset)+1)]):

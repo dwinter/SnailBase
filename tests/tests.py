@@ -1,36 +1,59 @@
-import unittest
-
+import unittest, sys, filecmp, os
+sys.path.append("/home/david/dev")
 import SnailBase as sb
-from Bio import SeqIO
 
-class TestSnailBase(unittest.TestCase)
+#setup
+d = sb.IO.read("spiders.fasta", "fasta")
 
-    def setup(self):
-    	d = sb.dataset_from_seqs(SeqIO.parse(open("spiders.fasta"), "fasta"))
-    
-    def test_read(self):
-      """ test on reading the spider data """
-     self.assertEqual(len(d), 39)
-     self.assertEqual(d.get_species[::11], 
-                      ['atritus', 'atritus', 'katipo', 'hasseltii'])
-     self.assertEqual(len(d.get_sequences("ITS")), 39)
-    
-    def test_add(self):
-      """ Test on adding squences to dataset """
-      d.add_seqs("SnailBase/tests/spidersCOI.fasta", "fasta")
-      self.assertEqual(lend(d.get_sequences("COI")), 39)
-    
-    def test_select(self):
+d2 = sb.IO.read("spiders.fasta", "fasta")
+d2.add_seqs("spidersCOI.fasta", "fasta")
+      
+files_to_delete = ["spiders.imap","spidersBEST.nex", "spiders.arp","spiders_its.fasta"]
+      
+class TestSnailBase(unittest.TestCase):
+
+  def test_read(self):
+    """ Can SnailBase read data and represent in correctly """
+    self.assertEqual(len(d), 39)
+    self.assertEqual(d.get_species()[::11], 
+                    ['atritus', 'atritus', 'katipo', 'hasseltii'])
+    self.assertEqual(len(d.get_sequences("ITS")), 39)
+
+  def test_add(self):
+    """ Does adding a sequence add specimens/sequences to dataset """
+    self.assertEqual(len(d2), 40)
+    self.assertEqual(len(d2.get_sequences("COI")), 39)
+
+  def test_select(self):
     """ do the selection methods work """
-    self.assertEqual(len(sb.select(d, "species", "katipo")), 20)
-    self.assertEqual(len(sb.select(d, "ngenes", 1)), 1)
-    self.assertEqual(len(sb.seletct(d, "id", "La13")),1)
-    
-    def test_write(self):
-    """ do all the writers work ? """
-    self.assertEqual(sb.write_species(d, "BEST"), best_block)
-    self.assertEqual(sb.write_species(d, "BEAST"), beast_block)
-    self.assertEqual(sb.write_species(d, "gsi"), gsi_table)
-    # other formats will need files
+    self.assertEqual(len(sb.select(d2, "species", "katipo")), 20)
+    self.assertEqual(len(sb.select(d2, "ngenes", 2)), 38)
+    self.assertEqual(len(sb.select(d2, "id", "La13")),1)
 
 
+class TestWriters(unittest.TestCase):
+  def tearDown(self):
+    """ delete files only neede for testing (must be a pretteir way...) """
+    for f in files_to_delete:
+      if os.path.isfile(f):
+        os.remove(f)
+  
+  def test_alignment(self):
+    """ Can we write an alignment for one gene """
+    sb.IO.write_alignment(d2, "ITS", "spiders_its.fasta", "fasta")
+    self.assertTrue(filecmp.cmp("spiders_its.fasta", "test_ITS.fasta"))
+  
+  def test_arp(self):
+    """ Can we write valid arlequin files """
+    sb.IO.write_alignment(d2, "COI", "spiders.arp", "arp", sample="species")
+    self.assertTrue(filecmp.cmp("spiders.arp", "test_arp.arp"))
+  
+  def test_multi(self):
+    """ Can we write formats for multi-species stuff """
+    sb.IO.write_multispecies(d2, "spidersBEST", "BEST")
+    self.assertTrue(filecmp.cmp("spidersBEST.nex", "test_BEST.nex"))
+    sb.IO.write_multispecies(d2, "spiders", "GSI")
+    self.assertTrue(filecmp.cmp("spiders.imap", "test_GSI.imap"))
+
+if __name__ == "__main__":
+    unittest.main()   

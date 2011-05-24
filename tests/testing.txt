@@ -1,5 +1,9 @@
-
+import sys
+sys.path.append("/home/david/dev")
 import SnailBase as sb
-spider = sb.IO.read("SnailBase/tests/spiders.fasta", "fasta")
+spider = sb.IO.read("spiders.fasta", "fasta")
 katipo = sb.select(spider, "species", "katipo")
 #sb.IO.write_alignment(spider, "COI", "spiders.arp", "arp", sample="species")
+spider2 = sb.IO.read("spiders.fasta", "fasta")
+spider2.add_seqs("spidersCOI.fasta", "fasta")
+sb.IO.write_multispecies(spiders2, "spiderBEST", "BEST")
