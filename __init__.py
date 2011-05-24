@@ -178,7 +178,7 @@ class Dataset(list):
         return genes
 
     def change_species(self, from_species, to_species):
-        """ changen a give species name to something else"""
+        """ change a give species name to something else"""
         for i, sp in enumerate(self.species()):
             if sp == from_species:
                 self[i].species = to_species
@@ -198,8 +198,10 @@ class Dataset(list):
     def sample_by_taxon(self, taxon_tuple):
         """ Randomly select samples from different taxa (returns new dataset)
         
-        Dataset.random_tax([("venosa", 2), ("globosa", "2")] returns Dataset
-        with 2 venosa and 2 globosa specimens
+        e.g. ``Dataset.sample_by_taxon([("katipo", 2), ('hasseltii', 2)])`` will
+        return a new dataset with 2 katipo and 2 hasseltii specimens. You may
+        want to use this to get smaller datasets for computationally 
+        intensive methods (or to do 'trial runs' with a reduced dataset)
         """
         out = []
         for species, n in taxon_tuple:
@@ -211,20 +213,13 @@ class Dataset(list):
 
 
 def select(dataset, attr, values, match_all=True):
-    """A tool to subselect datasets based on arrtibutes of specimens """ 
- 
-    if attr == "ngenes":
-        return [d for d in dataset if d.sequences.keys > values]
-    else:      
-        #type checking!!! (but I want to be able to pass string or list here)
-        if isinstance(values, basestring):
-            values = [values]
-        if match_all:
-            return Dataset([d for d in dataset if getattr(d, attr) in values])
-        else:
-            L = []
-            for v in values:
-                for d in dataset:
-                    if specimen.attr_map[attr] == v and d not in L:
-                        L.append(d)
-            return Dataset(L)
+  """A tool to subselect datasets based on arrtibutes of specimens """ 
+
+  if attr == "ngenes":
+    return [d for d in dataset if d.sequences.keys > values]
+  else:      
+    #type checking!!! (but I want to be able to pass string or list here)
+    if isinstance(values, basestring):
+      values = [values]
+    return Dataset([d for d in dataset if getattr(d, attr) in values])
+
