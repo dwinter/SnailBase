@@ -18,12 +18,12 @@ and site:
 
 Data is read into memory with the function ``SnailBase.IO.read()``
 
-``
+
 >>> import SnailBase as sb
 >>> spider_data = sb.IO.read("tests/spiders.fasta", "fasta")
 >>> spider_data
 < Dataset with 40 specimens >
-``
+
 
 The ``Dataset`` object acts like a list, with each element of the list being a 
 ``Specimen`` object.
@@ -76,6 +76,7 @@ wrote records in 3 samples"
 
 For species tree estimation you can make files for BEST and BEAST and you can 
 write an imap file for GSI analysis using ``write_multispecies()``
+
 >>> sb.IO.write_multispecies(d, "spiders", "BEAST")
 wrote spidersCOI.nex
 wrote spidersITS.nex
