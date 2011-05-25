@@ -11,10 +11,10 @@ SnailBase doesn't use persitant objects, instead it accepts a flat fasta DNA
 sequence file with the description field carrying information on species, gene 
 and site: 
 
-|>Hsap1 human COI Dunedin
-|ATAGCAGTAATGCT
-|>Hsap2 human COI Mosgeil
-|ATAFHCATAGGTAC
+| >Hsap1 human COI Dunedin
+| ATAGCAGTAATGCT
+| >Hsap2 human COI Mosgeil
+| ATAFHCATAGGTAC
 
 Data is read into memory with the function ``SnailBase.IO.read()``
 
@@ -76,10 +76,10 @@ wrote records in 3 samples"
 
 For species tree estimation you can make files for BEST and BEAST and you can 
 write an imap file for GSI analysis using ``write_multispecies()``
->> sb.IO.write_multispecies(d, "spiders", "BEAST")
+>>> sb.IO.write_multispecies(d, "spiders", "BEAST")
 wrote spidersCOI.nex
 wrote spidersITS.nex
->> sb.IO.write_multispecies(d, "spiders", "BEST")
+>>> sb.IO.write_multispecies(d, "spiders", "BEST")
 Add the following to the MrBayes block in spiders.nex
 begin MyBayes;
 taxset atritus = 1 2 9 10 11 12 13 14 15 16 17 18
